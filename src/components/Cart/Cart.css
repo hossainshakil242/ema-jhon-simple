@@ -1,0 +1,8 @@
+.cart{
+    background: #FF9900;
+    padding: 25px;
+    opacity: 85%;
+    font-size: 18px;
+    position: sticky;
+    top: 0;
+}
