@@ -10,3 +10,14 @@
     font-size: 17px;
     font-weight: bold;
 }
+.btn-clear-cart{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ff3030;
+    border-radius: 4px;
+    color: #ffff;
+    font-size: 18px;
+
+}
