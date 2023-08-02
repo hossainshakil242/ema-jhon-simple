@@ -15,3 +15,7 @@
 nav a:hover {
     color: orange;
 }
+.text-white{
+    color: #ffff;
+    padding-left: 15px;
+}
