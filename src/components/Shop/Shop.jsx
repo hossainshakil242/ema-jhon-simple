@@ -6,17 +6,44 @@ import { addToDb, deleteShoppingCart, getShoppingCart } from '../../utilities/fa
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightLong } from '@fortawesome/free-solid-svg-icons';
 
-import { Link } from 'react-router-dom';
+import { Link, useLoaderData } from 'react-router-dom';
 
 const Shop = () => {
     const [products, setProducts] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const [cart, setCart] = useState([]);
+    const { totalProducts } = useLoaderData();
 
-    useEffect(() => {
-        fetch('http://localhost:5000/products')
-            .then(res => res.json())
-            .then(data => setProducts(data))
-    }, []);
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+    const pagesNumbers = [...Array(totalPages).keys()]; // o to totalPage just simple arrray
+    console.log(pagesNumbers);
+
+
+    /**
+     * Pagination make: 
+     * Done: Determine the total number of items
+     * TODO: Decide on the number of items per page
+     * Done: Calculate the total number of Page 
+     * Done: Determine the current page
+     * 
+     */
+
+    // useEffect(() => {
+    //     fetch('http://localhost:5000/products')
+    //         .then(res => res.json())
+    //         .then(data => setProducts(data))
+    // }, []);
+
+    useEffect(()=>{
+        async function fetchData (){
+            const response = await fetch(`http://localhost:5000/products?page=${currentPage}&limit=${itemsPerPage}`);
+            const data = await response.json();
+            setProducts(data);
+        }
+        fetchData();
+    },[currentPage,itemsPerPage]);
+
 
     useEffect(() => {
         const storedCart = getShoppingCart();
@@ -63,34 +90,60 @@ const Shop = () => {
         deleteShoppingCart();
     }
 
+    const options = [5, 10, 20];
+    const handleSelectChange = (event) => {
+        setItemsPerPage(parseInt(event.target.value));
+        setCurrentPage(0);
+    }
+
     return (
-        <div className='shop-container'>
-            <div className="products-container">
+        <>
+            <div className='shop-container'>
+                <div className="products-container">
+                    {
+                        products.map(product => <Product
+                            key={product._id}
+                            product={product}
+                            handleAddToCart={handleAddToCart}
+                        ></Product>)
+                    }
+                </div>
+                <div className="cart-container">
+                    <Cart
+                        cart={cart}
+                        handleClearCart={handleClearCart}>
+
+                        <Link to='/orders'>
+                            <button className='btn-proceed'>
+                                <span>
+                                    Review Order
+                                </span>
+                                <FontAwesomeIcon className='faArrowRightLong' icon={faArrowRightLong} />
+
+                            </button>
+                        </Link>
+                    </Cart>
+                </div>
+            </div >
+
+            {/* pagination  */}
+            <div className="pagination">
+                <p>current Page: {currentPage} and itemPerPage: {itemsPerPage}</p>
                 {
-                    products.map(product => <Product
-                        key={product._id}
-                        product={product}
-                        handleAddToCart={handleAddToCart}
-                    ></Product>)
+                    pagesNumbers.map(number => <button
+                        key={number}
+                        className={currentPage === number? 'selected' : ''}
+                        onClick={() => setCurrentPage(number)}
+                    >{number}</button>)
                 }
-            </div>
-            <div className="cart-container">
-                <Cart
-                    cart={cart}
-                    handleClearCart={handleClearCart}>
 
-                    <Link to='/orders'>
-                        <button className='btn-proceed'>
-                            <span>
-                                Review Order
-                            </span>
-                            <FontAwesomeIcon className='faArrowRightLong' icon={faArrowRightLong} />
-
-                        </button>
-                    </Link>
-                </Cart>
+                <select value={itemsPerPage} onChange={handleSelectChange}>
+                    {
+                        options.map(option => <option value={option}>{option}</option>)
+                    }
+                </select>
             </div>
-        </div >
+        </>
     );
 };
 
